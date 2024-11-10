@@ -3,23 +3,82 @@ from newspaper import Article
 import re
 from transformers import pipeline
 
-# initialize pipeline
+# Initialize the  pipeline
 summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
 
-# CSS
+# CSS 
 st.markdown("""
     <style>
-    .main {
-        background-color: #f4f4f8;
-        color: #333333;
+    .title span {
+        display: inline-block;
+        opacity: 0;
+        color: #2e86de; 
+        animation: fadeIn 1s ease-in forwards;
+        animation-delay: 0s;
     }
-    h1 {
-        color: #2e86de;
+    .title .space {
+        margin-right: 10px; 
+    }
+
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    
+    .title span:nth-child(1) { animation-delay: 0s; }
+    .title span:nth-child(2) { animation-delay: 0.1s; }
+    .title span:nth-child(3) { animation-delay: 0.2s; }
+    .title span:nth-child(4) { animation-delay: 0.3s; }
+    .title .space:nth-child(5) { animation-delay: 0.4s; }
+    .title span:nth-child(6) { animation-delay: 0.5s; }
+    .title span:nth-child(7) { animation-delay: 0.6s; }
+    .title span:nth-child(8) { animation-delay: 0.7s; }
+    .title .space:nth-child(9) { animation-delay: 0.8s; }
+    .title span:nth-child(10) { animation-delay: 0.9s; }
+    .title span:nth-child(11) { animation-delay: 1.0s; }
+    .title span:nth-child(12) { animation-delay: 1.1s; }
+    .title span:nth-child(13) { animation-delay: 1.2s; }
+    .title span:nth-child(14) { animation-delay: 1.3s; }
+    .title span:nth-child(15) { animation-delay: 1.4s; }
+    .title span:nth-child(16) { animation-delay: 1.5s; }
+    .title span:nth-child(17) { animation-delay: 1.6s; }
+    .title span:nth-child(18) { animation-delay: 1.7s; }
+    .title span:nth-child(19) { animation-delay: 1.8s; }
+    .title span:nth-child(20) { animation-delay: 1.9s; }
+    .title span:nth-child(21) { animation-delay: 2.0s; }
+
+    
+    @keyframes cycle {
+        0%, 100% { opacity: 1; } 
+        50% { opacity: 0; } 
+    }
+
+   
+    .title {
+        animation: fadeIn 4s ease-out infinite, pauseAfterCycle 4.5s ease-in-out infinite;
+    }
+
+    
+    @keyframes pauseAfterCycle {
+        0% { opacity: 1; }
+        50% { opacity: 1; }
+        100% { opacity: 0; } 
     }
     </style>
+    <h1 class="title">
+        <span>📰</span><span>A</span><span>I</span><span class="space"> </span><span>N</span><span>e</span><span>w</span><span>s</span><span class="space"> </span><span>S</span><span>u</span><span>m</span><span>m</span><span>a</span><span>r</span><span>i</span><span>z</span><span>e</span><span>r</span>
+    </h1>
     """, unsafe_allow_html=True)
 
-# fetch article text from URL
+# Fetch article text from URL
 def fetch_article(url):
     try:
         article = Article(url)
@@ -30,6 +89,7 @@ def fetch_article(url):
         st.error(f"Error fetching article from URL: {e}")
         return None
 
+# Summarization function using Hugging Face
 def huggingface(text):
     try:
         summary = summarizer(text, max_length=150, min_length=50, do_sample=False)
@@ -38,16 +98,15 @@ def huggingface(text):
         st.error(f"Error with Hugging Face API: {e}")
         return "Summary could not be generated."
 
-# main function
+# Main function
 def main():
-    st.title("📰 AI News Summarizer")
     st.write("Enter a news article as text or URL to get a concise summary.")
 
-    # option
+    # Options in the sidebar
     st.sidebar.title("Options")
     option = st.sidebar.selectbox("Choose input type:", ["Text", "URL"])
 
-    # display input field
+    # Display input field
     if option == "Text":
         news_text = st.text_area("✍️ Enter the news text here", height=300)
     elif option == "URL":
@@ -56,16 +115,18 @@ def main():
 
     if option == "URL" and news_text:
         st.write("**Fetched Article Preview:**")
-        st.write(news_text[:500] + ("..." if len(news_text) > 500 else ""))  # Display first 500 characters of the article
-
-    # button
+        st.write(news_text[:500] + ("..." if len(news_text) > 500 else ""))  
+    # Summarize button
     if st.button("💡 Summarize"):
-        cleaned_text = re.sub(r"\s+", " ", news_text.strip())[:3000]  # clean and truncate text to 3000 characters
-        with st.spinner("Summarizing... Please wait."):
-            summary = huggingface(cleaned_text)
-                
-        st.subheader("Summary")
-        st.write(summary)
+        if news_text:
+            cleaned_text = re.sub(r"\s+", " ", news_text.strip())[:3000]  
+            with st.spinner("Summarizing... Please wait."):
+                summary = huggingface(cleaned_text)
+
+            st.subheader("Summary")
+            st.write(summary)
+        else:
+            st.warning("Please enter some text or a URL.")
 
 if __name__ == "__main__":
     main()
