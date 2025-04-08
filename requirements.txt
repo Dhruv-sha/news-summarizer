@@ -3,3 +3,5 @@ newspaper3k
 transformers
 torch
 lxml
+lxml[html_clean]
+

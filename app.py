@@ -4,7 +4,33 @@ import re
 from transformers import pipeline
 
 # Initialize the  pipeline
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+
+import requests
+from bs4 import BeautifulSoup
+
+
+def fetch_article(url):
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+        }
+        response = requests.get(url, headers=headers, timeout=10)
+        soup = BeautifulSoup(response.content, "html.parser")
+
+        # For BBC articles
+        paragraphs = soup.find_all("p")
+        article_text = " ".join(p.get_text() for p in paragraphs)
+
+        return article_text
+    except Exception as e:
+        st.error(f"Error fetching article from URL: {e}")
+        return None
+
+
+model_name = "sshleifer/distilbart-cnn-12-6"
 summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
+
 
 # CSS 
 st.markdown("""
